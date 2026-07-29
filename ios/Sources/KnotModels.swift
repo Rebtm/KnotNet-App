@@ -17,6 +17,8 @@ struct CrossingOrderEntry: Codable, Equatable {
 struct KnotResponse: Codable, Identifiable, Equatable {
     let id: String
     let rawImageUrl: String?
+    let detectionUrl: String?
+    let traversalUrl: String?
     let visualizationUrl: String?
     let mode: String?
     let sequence: [String]?
@@ -29,6 +31,8 @@ struct KnotResponse: Codable, Identifiable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id
         case rawImageUrl = "raw_image_url"
+        case detectionUrl = "detection_url"
+        case traversalUrl = "traversal_url"
         case visualizationUrl = "visualization_url"
         case mode
         case sequence

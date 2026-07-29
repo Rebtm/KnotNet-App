@@ -22,6 +22,7 @@ PBXPROJ_CONTENT = """// !$*UTF8*$!
 		B1A2C3D42E8D1A2B00000004 /* ResultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A2C3D42E8D1A2A00000004 /* ResultView.swift */; };
 		B1A2C3D42E8D1A2B00000005 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A2C3D42E8D1A2A00000005 /* ContentView.swift */; };
 		B1A2C3D42E8D1A2B00000006 /* KnotNetApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A2C3D42E8D1A2A00000006 /* KnotNetApp.swift */; };
+		B1A2C3D42E8D1A2B00000007 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1A2C3D42E8D1A2A00000008 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@ PBXPROJ_CONTENT = """// !$*UTF8*$!
 		B1A2C3D42E8D1A2A00000005 /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ContentView.swift; path = Sources/ContentView.swift; sourceTree = "<group>"; };
 		B1A2C3D42E8D1A2A00000006 /* KnotNetApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = KnotNetApp.swift; path = Sources/KnotNetApp.swift; sourceTree = "<group>"; };
 		B1A2C3D42E8D1A2A00000007 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Sources/Info.plist; sourceTree = "<group>"; };
+		B1A2C3D42E8D1A2A00000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Sources/Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@ PBXPROJ_CONTENT = """// !$*UTF8*$!
 				B1A2C3D42E8D1A2A00000002 /* NetworkClient.swift */,
 				B1A2C3D42E8D1A2A00000001 /* KnotModels.swift */,
 				B1A2C3D42E8D1A2A00000007 /* Info.plist */,
+				B1A2C3D42E8D1A2A00000008 /* Assets.xcassets */,
 			);
 			name = KnotNetApp;
 			sourceTree = "<group>";
@@ -133,6 +136,7 @@ PBXPROJ_CONTENT = """// !$*UTF8*$!
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B1A2C3D42E8D1A2B00000007 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +278,7 @@ PBXPROJ_CONTENT = """// !$*UTF8*$!
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "";

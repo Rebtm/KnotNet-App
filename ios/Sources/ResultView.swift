@@ -3,18 +3,51 @@ import SwiftUI
 struct ResultView: View {
     let result: KnotResponse
     @ObservedObject var client: KnotNetClient
-    @State private var showOriginalImage = false
+    @State private var selectedPageIndex = 0
     @State private var selectedTab = 0
+    @State private var fullScreenImageUrl: String? = nil
     
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                // Header Image Container
-                ImageComparisonHeader(result: result, showOriginalImage: $showOriginalImage)
-                    .frame(height: 320)
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                // Header Image Container (Swipeable Carousel)
+                VisualizationCarouselHeader(
+                    result: result,
+                    selectedPageIndex: $selectedPageIndex,
+                    onTapImage: { url in
+                        fullScreenImageUrl = url
+                    }
+                )
+                .frame(height: 380)
+                .clipShape(RoundedRectangle(cornerRadius: 20))
+                .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
+                .padding(.horizontal)
+                
+                // Traversal warning banner if no sequence found
+                if (result.sequence?.count ?? 0) <= 1 {
+                    HStack(spacing: 12) {
+                        Image(systemName: "info.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.orange)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Hinweis zum Durchlauf (Traversal)")
+                                .font(.subheadline)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                            Text("Ein Durchlauf konnte nicht berechnet werden. Das Modell benötigt beide sichtbaren Seilenden im Bild, um den Pfad von Endpunkt A bis Z zu verfolgen.")
+                                .font(.caption)
+                                .foregroundColor(.white.opacity(0.85))
+                        }
+                    }
+                    .padding()
+                    .background(Color.orange.opacity(0.15))
+                    .cornerRadius(14)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.orange.opacity(0.4), lineWidth: 1)
+                    )
                     .padding(.horizontal)
+                }
                 
                 // Segmented Control (Tabs)
                 Picker("Ansicht", selection: $selectedTab) {
@@ -46,68 +79,190 @@ struct ResultView: View {
         )
         .navigationTitle("Knoten-Analyse")
         .navigationBarTitleDisplayMode(.inline)
+        .fullScreenCover(item: Binding(
+            get: { fullScreenImageUrl.map { IdentifiableURL(url: $0) } },
+            set: { fullScreenImageUrl = $0?.url }
+        )) { item in
+            FullScreenImageView(imageUrlString: item.url)
+        }
     }
 }
 
-// MARK: - Subviews
+struct IdentifiableURL: Identifiable {
+    let id = UUID()
+    let url: String
+}
 
-struct ImageComparisonHeader: View {
+// MARK: - Visualization Carousel Header
+
+struct VisualizationSlideInfo {
+    let title: String
+    let subtitle: String
+    let icon: String
+    let url: String?
+    let badgeColor: Color
+}
+
+struct VisualizationCarouselHeader: View {
     let result: KnotResponse
-    @Binding var showOriginalImage: Bool
+    @Binding var selectedPageIndex: Int
+    var onTapImage: ((String) -> Void)? = nil
+    
+    var slides: [VisualizationSlideInfo] {
+        [
+            VisualizationSlideInfo(
+                title: "Detections",
+                subtitle: "Kreuzungen & Over/Under Keypoints",
+                icon: "scope",
+                url: result.detectionUrl ?? result.visualizationUrl,
+                badgeColor: .blue
+            ),
+            VisualizationSlideInfo(
+                title: "Traversal",
+                subtitle: "Strang-Durchlauf & Sequenz-Pfeile",
+                icon: "arrow.triangle.pull",
+                url: result.traversalUrl ?? result.visualizationUrl,
+                badgeColor: .orange
+            ),
+            VisualizationSlideInfo(
+                title: "Gesamtübersicht",
+                subtitle: "Detections + Traversal + Codes",
+                icon: "square.grid.2x2.fill",
+                url: result.visualizationUrl,
+                badgeColor: .purple
+            ),
+            VisualizationSlideInfo(
+                title: "Original",
+                subtitle: "Foto-Rohaufnahme",
+                icon: "photo.fill",
+                url: result.rawImageUrl,
+                badgeColor: .green
+            )
+        ]
+    }
     
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            // Background skeleton loader while image loads
-            ProgressView()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.black.opacity(0.2))
+        VStack(spacing: 0) {
+            // Top Navigation Segment / Badge Bar
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(0..<slides.count, id: \.self) { index in
+                        let slide = slides[index]
+                        let isSelected = selectedPageIndex == index
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                selectedPageIndex = index
+                            }
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: slide.icon)
+                                Text(slide.title)
+                                    .font(.caption)
+                                    .fontWeight(isSelected ? .bold : .medium)
+                            }
+                            .foregroundColor(isSelected ? .white : .white.opacity(0.6))
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 14)
+                            .background(isSelected ? slide.badgeColor : Color.white.opacity(0.08))
+                            .clipShape(Capsule())
+                        }
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+            }
+            .background(Color.black.opacity(0.4))
             
-            // Image Loader
-            let imageUrlString = showOriginalImage ? result.rawImageUrl : result.visualizationUrl
-            if let imageUrlString = imageUrlString, let url = URL(string: imageUrlString) {
+            // Image Pager
+            ZStack(alignment: .bottom) {
+                TabView(selection: $selectedPageIndex) {
+                    ForEach(0..<slides.count, id: \.self) { index in
+                        let slide = slides[index]
+                        ZStack {
+                            Color.black.opacity(0.4)
+                            
+                            if let urlString = slide.url, let url = URL(string: urlString) {
+                                AsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .onTapGesture {
+                                            onTapImage?(urlString)
+                                        }
+                                } placeholder: {
+                                    VStack(spacing: 8) {
+                                        ProgressView().tint(slide.badgeColor)
+                                        Text("Lade \(slide.title)...")
+                                            .foregroundColor(.gray)
+                                            .font(.caption)
+                                    }
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                }
+                            } else {
+                                VStack {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .font(.largeTitle)
+                                        .foregroundColor(.gray)
+                                    Text("Kein Bild verfügbar")
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            }
+                        }
+                        .tag(index)
+                    }
+                }
+                .tabViewStyle(.page(indexDisplayMode: .always))
+                
+                // Bottom Hint Bar
+                HStack {
+                    Text("Wischen für weitere Ansichten ↔")
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.7))
+                    Spacer()
+                    Image(systemName: "magnifyingglass.circle.fill")
+                        .foregroundColor(.white.opacity(0.8))
+                    Text("Tippen für Vollbild")
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.7))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 6)
+                .background(Color.black.opacity(0.6))
+            }
+        }
+        .background(Color.black.opacity(0.3))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
+    }
+}
+
+// MARK: - Full Screen Image View
+
+struct FullScreenImageView: View {
+    let imageUrlString: String
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            Color.black.ignoresSafeArea()
+            
+            if let url = URL(string: imageUrlString) {
                 AsyncImage(url: url) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.black.opacity(0.4))
                 } placeholder: {
-                    VStack {
-                        ProgressView()
-                            .tint(.blue)
-                        Text("Lade Visualisierung...")
-                            .foregroundColor(.gray)
-                            .font(.caption)
-                            .padding(.top, 8)
-                    }
+                    ProgressView().tint(.white)
                 }
-            } else {
-                Text("Kein Bild verfügbar")
-                    .foregroundColor(.white)
             }
             
-            // Toggle overlay button
-            Button(action: {
-                withAnimation(.spring()) {
-                    showOriginalImage.toggle()
-                }
-            }) {
-                HStack(spacing: 6) {
-                    Image(systemName: showOriginalImage ? "eye" : "eye.slash")
-                    Text(showOriginalImage ? "Original" : "Visualisierung")
-                }
-                .font(.footnote)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 12)
-                .background(.ultraThinMaterial)
-                .clipShape(Capsule())
-                .overlay(
-                    Capsule()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 1)
-                )
-                .padding(12)
+            Button(action: { dismiss() }) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(20)
             }
         }
     }
@@ -119,7 +274,6 @@ struct OverviewTab: View {
     
     // Classify knot based on typical Jones / PD code
     var knotName: String {
-        // Typically the backend handles classification, if not let's show a fallback matching table
         let jones = result.topology?.jonesStr ?? ""
         let cleanJones = jones.replacingOccurrences(of: " ", with: "")
         
@@ -305,7 +459,6 @@ struct TopologyTab: View {
 struct PerformanceTab: View {
     let result: KnotResponse
     
-    // Sort timings to display nicely
     var sortedTimings: [(String, Double)] {
         (result.timing ?? [:]).sorted(by: { $0.value > $1.value })
     }
@@ -314,7 +467,6 @@ struct PerformanceTab: View {
         (result.timing ?? [:]).values.reduce(0, +)
     }
 
-    
     var body: some View {
         VStack(spacing: 16) {
             // Total Time Card
@@ -352,7 +504,6 @@ struct PerformanceTab: View {
                                 .foregroundColor(.yellow)
                         }
                         
-                        // Progress bar representation
                         GeometryReader { geo in
                             ZStack(alignment: .leading) {
                                 Capsule()
