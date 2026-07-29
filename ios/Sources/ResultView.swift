@@ -125,13 +125,6 @@ struct VisualizationCarouselHeader: View {
                 badgeColor: .orange
             ),
             VisualizationSlideInfo(
-                title: "Gesamtübersicht",
-                subtitle: "Detections + Traversal + Codes",
-                icon: "square.grid.2x2.fill",
-                url: result.visualizationUrl,
-                badgeColor: .purple
-            ),
-            VisualizationSlideInfo(
                 title: "Original",
                 subtitle: "Foto-Rohaufnahme",
                 icon: "photo.fill",

@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "app_icon 3.png",
+      "filename" : "app_icon 5.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -32,6 +32,7 @@
       "size" : "40x40"
     },
     {
+      "filename" : "app_icon 4.png",
       "idiom" : "iphone",
       "scale" : "3x",
       "size" : "40x40"
@@ -64,7 +65,6 @@
       "size" : "40x40"
     },
     {
-      "filename" : "app_icon.png",
       "idiom" : "ipad",
       "scale" : "2x",
       "size" : "76x76"
