@@ -29,7 +29,7 @@ The app allows users to photograph knots, detect crossing keypoints, trace stran
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 KnotNet-App/
@@ -91,6 +91,6 @@ xcodebuild -project KnotNetApp.xcodeproj -scheme KnotNetApp -sdk iphoneos build
 
 ---
 
-## 💡 Hinweis für beste Ergebnisse
+## Hinweis für beste Ergebnisse
 
 Damit die KnotNet Pipeline die Traversierungs-Sequenz ($A \to Z$) berechnen kann, stellen Sie bitte sicher, dass **beide Seilenden** auf dem Foto vollständig sichtbar sind!
