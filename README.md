@@ -80,7 +80,7 @@ Das Backend startet unter `http://0.0.0.0:8000` (sowie über Ihre lokale WLAN-IP
 1. Öffnen Sie `ios/KnotNetApp.xcodeproj` in Xcode.
 2. Wählen Sie Ihr **iPhone** oder einen **Simulator** als Zielgerät oben aus.
 3. Wählen Sie unter _Signing & Capabilities_ Ihr Personal Team aus.
-4. Drücken Sie **`Cmd + R`** (bzw. den ▶️ _Play_-Button).
+4. Drücken Sie **`Cmd + R`** (bzw. den _Play_-Button).
 
 #### Option B: Über das Terminal (auf echtem iPhone)
 
