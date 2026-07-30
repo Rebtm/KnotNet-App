@@ -63,3 +63,5 @@ fastlane/test_output
 
 backend/.venv/
 backend/__pycache__/
+backend/static/results
+backend/static/uploads
